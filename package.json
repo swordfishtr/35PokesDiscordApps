@@ -1,0 +1,29 @@
+{
+  "name": "35pokesdiscordapps",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/Controller.js",
+    "deploybot": "node dist/Bot.js deploy"
+  },
+  "author": "demirab1",
+  "license": "GPL-3.0-only",
+  "homepage": "https://github.com/swordfishtr/35PokesDiscordApps#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swordfishtr/35PokesDiscordApps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swordfishtr/35PokesDiscordApps/issues"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
+    "discord.js": "^14.22.1"
+  }
+}

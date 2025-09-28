@@ -1,0 +1,7 @@
+{
+	"sudoers": [""],
+	"bot": {
+		"token": "",
+		"clientid": ""
+	}
+}

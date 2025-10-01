@@ -2,6 +2,10 @@
 	"sudoers": [""],
 	"bot": {
 		"token": "",
-		"clientid": ""
+		"clientid": "",
+		"collectGarbage": 0,
+		"LiveUsageStats": {
+			"interval": 0
+		}
 	}
 }

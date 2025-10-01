@@ -23,7 +23,7 @@ const rootPath = import.meta.dirname;
 export class CommandError extends Error {}
 
 export function getAuthority(interaction: ChatInputCommandInteraction) {
-	if(interaction.client.sudoers.includes(interaction.user.id)) return Authority.SUDOER;
+	if(interaction.client.config.sudoers.includes(interaction.user.id)) return Authority.SUDOER;
 	const general = interaction.client.channels.cache.get('1128016692128260198') as GuildBasedChannel;
 	const barracks = interaction.client.channels.cache.get('1145900216172687460') as GuildBasedChannel;
 	if(general && barracks && (interaction.member instanceof GuildMember)) {

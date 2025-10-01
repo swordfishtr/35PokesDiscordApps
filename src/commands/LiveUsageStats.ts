@@ -120,12 +120,11 @@ export default new class extends BotCommand {
 	/** channel.id (snowflake), data url like `http://us3.bot-hosting.net:20984/lus/2025/2025_09` */
 	channels: Record<string, URL> = {};
 
-	// TODO: config
 	interval = setInterval(async () => {
 		for(const id in this.channels) {
 			await this.update(id);
 		}
-	}, 60 * 60 * 1000);
+	}, (this.client.config.bot.LiveUsageStats.interval || 60) * 60 * 1000);
 
 	async update(id: string) {
 		const channel = this.client.channels.cache.get(id);

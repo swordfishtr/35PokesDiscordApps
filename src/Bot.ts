@@ -22,10 +22,9 @@ import { Temporal } from '@js-temporal/polyfill';
 
 declare module 'discord.js' {
 	interface Client {
+		config: any,
 		/** Along with the type benefits, ensures that all properties below are loaded. */
 		ready: Promise<Client<true>>,
-		/** Users that bypass rank checks. */
-		sudoers: string[],
 		/** Subcommands handled within. */
 		commands: Record<string, BotCommand>,
 		/** pokemon-showdown */
@@ -38,6 +37,7 @@ declare module 'discord.js' {
 }
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+client.config = Util.importJSON(Util.root('..', 'config.json'));
 export default client;
 
 void async function(){
@@ -60,8 +60,9 @@ void async function(){
 	if(import.meta.main && process.argv.includes('deploy')) {
 		const commands = Object.values(client.commands).map((x) => x.metadata);
 		Util.logTimestamp(`Deploying ${commands.length} bot commands:${commands.map((x) => `\n- ${x.name}`).join()}`);
-		const { clientid, token } = Util.importJSON(Util.root('..', 'config.json')).bot;
-		await new REST().setToken(token).put(Routes.applicationCommands(clientid), { body: commands });
+		await new REST()
+		.setToken(client.config.bot.token)
+		.put(Routes.applicationCommands(client.config.bot.clientid), { body: commands });
 		Util.logTimestamp('Success!');
 		process.exit();
 	}
@@ -69,14 +70,13 @@ void async function(){
 	setInterval(() => {
 		const now = Temporal.Now.instant().epochMilliseconds;
 		Object.values(client.commands).forEach((x) => x.cleanCooldowns(now));
-	}, 60 * 60 * 1000); // TODO: config
+	}, (client.config.bot.collectGarbage || 6) * 60 * 60 * 1000);
 
 	client.metagames = {};
 
 	client.showdown = showdown;
 	showdown.Dex.includeData();
 
-	client.sudoers = Util.importJSON(Util.root('..', 'config.json')).sudoers;
 	client.dump = () => {
 		let buf = 'tbd';
 		return buf;
@@ -95,5 +95,5 @@ void async function(){
 		if(!interaction.isAutocomplete()) return;
 	});
 
-	client.login(Util.importJSON(Util.root('..', 'config.json')).bot.token);
+	client.login(client.config.bot.token);
 }();

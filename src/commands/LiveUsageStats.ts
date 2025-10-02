@@ -152,6 +152,7 @@ export default new class extends BotCommand {
 
 	parseStats(data: StatsData) {
 		const allPokemon = Object.values(data).flat();
+		const totalBattles = Object.keys(data).length;
 
 		const stats: Record<string, number> = {};
 		for(const pokemon of allPokemon) {
@@ -165,7 +166,7 @@ export default new class extends BotCommand {
 		.reverse();
 
 		const description = ranked
-		.map(([id, n], i) => `${i + 1}. **${this.client.showdown.Dex.species.get(id).name}**: ${((n / allPokemon.length) * 100).toFixed(2)}%`)
+		.map(([id, n], i) => `${i + 1}. **${this.client.showdown.Dex.species.get(id).name}**: ${((n / totalBattles) * 100).toFixed(2)}%`)
 		.slice(0, 100)
 		.join('\n');
 
@@ -173,7 +174,7 @@ export default new class extends BotCommand {
 		.setTitle('**Usage Stats**')
 		.setColor(0x5ABD8B)
 		.setDescription(description)
-		.setFooter({ text: `From ${Object.keys(data).length} public battles` });
+		.setFooter({ text: `From ${totalBattles} public battles` });
 
 		if(ranked[0]) {
 			const { spriteid } = this.client.showdown.Dex.species.get(ranked[0][0]);

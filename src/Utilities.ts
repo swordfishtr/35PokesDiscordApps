@@ -17,8 +17,6 @@ export enum Authority {
 	SUDOER,
 }
 
-const rootPath = import.meta.dirname;
-
 /** Does not get saved in the log. */
 export class CommandError extends Error {}
 
@@ -42,11 +40,7 @@ export function logTimestamp(input: any) {
 
 /** Get path relative to `/path/to/project/dist` */
 export function root(...paths: string[]) {
-	return path.resolve(rootPath, ...paths);
-}
-
-export function importDefault(m: string) {
-	return import(m).then((x) => x.default);
+	return path.resolve(__dirname, ...paths);
 }
 
 /** No type definitions, but this doesn't cache and gets garbage collected. */

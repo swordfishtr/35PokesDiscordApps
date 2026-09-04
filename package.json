@@ -1,11 +1,9 @@
 {
   "name": "35pokesdiscordapps",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "type": "module",
-  "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
-    "build": "tsc",
     "start": "node dist/Controller.js",
     "deploybot": "node dist/Bot.js deploy"
   },

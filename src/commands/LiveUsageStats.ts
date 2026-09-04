@@ -16,39 +16,39 @@ export default new class extends BotCommand {
 	override cooldownPersonal = 0;
 
 	override metadata = new SlashCommandBuilder()
-	.setName('live-usage-stats')
-	.setDescription('Posts live usage stats collected from 35PokesPSBot.')
-	.addSubcommand((s) => s
-		.setName('list')
-		.setDescription('Prints all subscribed channels.')
-		.addChannelOption((o) => o
-			.setName('channel')
-			.setDescription('Prints whether this channel is subscribed.')))
-	.addSubcommand((s) => s
-		.setName('create')
-		.setDescription('Subscribes a channel.')
-		.addChannelOption((o) => o
-			.setName('channel')
-			.setDescription('Channel to subscribe.')
-			.addChannelTypes([
-				ChannelType.GuildAnnouncement,
-				ChannelType.AnnouncementThread,
-			])
-			.setRequired(true))
-		.addStringOption((o) => o
-			.setName('url')
-			.setDescription('URL of the data endpoint.')
-			.setRequired(true)))
-	.addSubcommand((s) => s
-		.setName('delete')
-		.setDescription('Unsubscribes a channel.')
-		.addChannelOption((o) => o
-			.setName('channel')
-			.setDescription('Channel to unsubscribe.')
-			.setRequired(true)));
+		.setName('live-usage-stats')
+		.setDescription('Posts live usage stats collected from 35PokesPSBot.')
+		.addSubcommand((s) => s
+			.setName('list')
+			.setDescription('Prints all subscribed channels.')
+			.addChannelOption((o) => o
+				.setName('channel')
+				.setDescription('Prints whether this channel is subscribed.')))
+		.addSubcommand((s) => s
+			.setName('create')
+			.setDescription('Subscribes a channel.')
+			.addChannelOption((o) => o
+				.setName('channel')
+				.setDescription('Channel to subscribe.')
+				.addChannelTypes([
+					ChannelType.GuildAnnouncement,
+					ChannelType.AnnouncementThread,
+				])
+				.setRequired(true))
+			.addStringOption((o) => o
+				.setName('url')
+				.setDescription('URL of the data endpoint.')
+				.setRequired(true)))
+		.addSubcommand((s) => s
+			.setName('delete')
+			.setDescription('Unsubscribes a channel.')
+			.addChannelOption((o) => o
+				.setName('channel')
+				.setDescription('Channel to unsubscribe.')
+				.setRequired(true)));
 
 	override interact(interaction: ChatInputCommandInteraction) {
-		switch(interaction.options.getSubcommand()) {
+		switch (interaction.options.getSubcommand()) {
 			case 'list': return this.list(interaction);
 			case 'create': return this.create(interaction);
 			case 'delete': return this.delete(interaction);
@@ -58,8 +58,8 @@ export default new class extends BotCommand {
 
 	async list(interaction: ChatInputCommandInteraction) {
 		const channel = interaction.options.getChannel('channel', false);
-		if(channel) {
-			if(channel.id in this.channels) {
+		if (channel) {
+			if (channel.id in this.channels) {
 				return interaction.reply(`<#${channel.id}> is subscribed to ${this.channels[channel.id]}`);
 			}
 			else {
@@ -67,9 +67,9 @@ export default new class extends BotCommand {
 			}
 		}
 		const out = Object
-		.entries(this.channels)
-		.map(([id, url]) => `<#${id}> is subscribed to ${url}`)
-		.join('\n') || 'There are no subscriptions currently.';
+			.entries(this.channels)
+			.map(([id, url]) => `<#${id}> is subscribed to ${url}`)
+			.join('\n') || 'There are no subscriptions currently.';
 		return interaction.reply(out);
 	}
 
@@ -78,11 +78,11 @@ export default new class extends BotCommand {
 			ChannelType.GuildAnnouncement,
 			ChannelType.AnnouncementThread,
 		]);
-		if(channel.id in this.channels) {
+		if (channel.id in this.channels) {
 			throw new Util.CommandError(`<#${channel.id}> is currently subscribed to ${this.channels[channel.id]}`);
 		}
 		const url = new URL(interaction.options.getString('url', true));
-		if(!['http:', 'https:'].includes(url.protocol)) {
+		if (!['http:', 'https:'].includes(url.protocol)) {
 			throw new Util.CommandError('Invalid URL protocol.');
 		}
 		this.channels[channel.id] = url;
@@ -93,7 +93,7 @@ export default new class extends BotCommand {
 
 	async delete(interaction: ChatInputCommandInteraction) {
 		const channel = interaction.options.getChannel('channel', true);
-		if(!(channel.id in this.channels)) {
+		if (!(channel.id in this.channels)) {
 			throw new Util.CommandError(`<#${channel.id}> is not subscribed.`);
 		}
 		delete this.channels[channel.id];
@@ -109,7 +109,7 @@ export default new class extends BotCommand {
 		super();
 		try {
 			const config = Util.importJSON(this.configPath);
-			for(const channel in config) {
+			for (const channel in config) {
 				config[channel] = new URL(config[channel]);
 			}
 			this.channels = config;
@@ -117,67 +117,75 @@ export default new class extends BotCommand {
 		catch {}
 	}
 
-	/** channel.id (snowflake), data url like `http://us3.bot-hosting.net:20984/lus/2025/2025_09` */
+	/** channel.id (snowflake), data url like `http://us3.bot-hosting.net:20984/2025/2025_09` */
 	channels: Record<string, URL> = {};
 
 	interval = setInterval(async () => {
-		for(const id in this.channels) {
+		for (const id in this.channels) {
 			await this.update(id);
 		}
 	}, (this.client.config.bot.LiveUsageStats.interval || 60) * 60 * 1000);
 
 	async update(id: string) {
 		const channel = this.client.channels.cache.get(id);
-		if(!channel || !(
+		if (!channel || !(
 			channel.type === ChannelType.GuildAnnouncement ||
 			channel.type === ChannelType.AnnouncementThread
 		)) return;
 		try {
 			const response = await fetch(this.channels[id]);
-			if(!response.ok) throw new Error();
+			if (!response.ok) throw new Error();
 			const data: StatsData = await response.json();
 			const out = this.parseStats(data);
 			const message = await channel.send({ embeds: [out] });
-			if(message.crosspostable) await message.crosspost();
+			if (message.crosspostable) await message.crosspost();
 		}
 		catch {
 			try {
 				await channel.send('Failed to parse usage stats.');
 			}
-			catch(error) {
+			catch (error) {
 				Util.logTimestamp(error);
 			}
 		}
 	}
 
 	parseStats(data: StatsData) {
+		const {pokedex, toID} = this.client;
+
 		const allPokemon = Object.values(data).flat();
 		const totalBattles = Object.keys(data).length;
+		const totalTeams = totalBattles * 2;
 
 		const stats: Record<string, number> = {};
-		for(const pokemon of allPokemon) {
+		for (const pokemon of allPokemon) {
 			stats[pokemon] ??= 0;
 			stats[pokemon]++;
 		}
 
 		const ranked = Object
-		.entries(stats)
-		.sort((a, b) => a[1] - b[1])
-		.reverse();
+			.entries(stats)
+			.sort((a, b) => a[1] - b[1])
+			.reverse();
 
 		const description = ranked
-		.map(([id, n], i) => `${i + 1}. **${this.client.showdown.Dex.species.get(id).name}**: ${((n / totalBattles) * 100).toFixed(2)}%`)
-		.slice(0, 100)
-		.join('\n');
+			.map(([id, n], i) => `${i + 1}. **${pokedex[id].name}**: ${((n / totalTeams) * 100).toFixed(2)}%`)
+			.slice(0, 100)
+			.join('\n');
 
 		const embed = new EmbedBuilder()
-		.setTitle('**Usage Stats**')
-		.setColor(0x5ABD8B)
-		.setDescription(description)
-		.setFooter({ text: `From ${totalBattles} public battles` });
+			.setTitle('**Usage Stats**')
+			.setColor(0x5ABD8B)
+			.setDescription(description)
+			.setFooter({ text: `From ${totalBattles} public battles` });
 
-		if(ranked[0]) {
-			const { spriteid } = this.client.showdown.Dex.species.get(ranked[0][0]);
+		if (ranked[0]) {
+			let spriteid = 'unown-qm';
+			const species = pokedex[ranked[0][0]];
+			if (species) {
+				const baseSpecies = species.baseSpecies || species.name;
+				spriteid = toID(baseSpecies) + (baseSpecies !== species.name ? `-${toID(species.forme)}` : '');
+			}
 			embed.setThumbnail(`https://play.pokemonshowdown.com/sprites/gen5/${spriteid}.png`);
 		}
 

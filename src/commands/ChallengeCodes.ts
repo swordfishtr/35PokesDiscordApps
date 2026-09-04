@@ -10,26 +10,26 @@ export default new class extends BotCommand {
 	override cooldownPersonal = 0;
 
 	override metadata = new SlashCommandBuilder()
-	.setName('chalcode')
-	.setDescription('Converts a list of Pokemon into their precise formes for use in challenge codes.')
-	.addSubcommand((s) => s
-		.setName('ruleset')
-		.setDescription('Output in "+pokemon1, +pokemon2, +pokemon3" format.')
-		.addStringOption((o) => o
-			.setName('list')
-			.setDescription('Comma separated list of pokemon.')
-			.setRequired(true)))
-	.addSubcommand((s) => s
-		.setName('array')
-		.setDescription(`Output in "['pokemon1', 'pokemon2', 'pokemon3']" format.`)
-		.addStringOption((o) => o
-			.setName('list')
-			.setDescription('Comma separated list of pokemon.')
-			.setRequired(true)));
+		.setName('chalcode')
+		.setDescription('Converts a list of Pokemon into their precise formes for use in challenge codes.')
+		.addSubcommand((s) => s
+			.setName('ruleset')
+			.setDescription('Output in "+pokemon1, +pokemon2, +pokemon3" format.')
+			.addStringOption((o) => o
+				.setName('list')
+				.setDescription('Comma separated list of pokemon.')
+				.setRequired(true)))
+		.addSubcommand((s) => s
+			.setName('array')
+			.setDescription(`Output in "['pokemon1', 'pokemon2', 'pokemon3']" format.`)
+			.addStringOption((o) => o
+				.setName('list')
+				.setDescription('Comma separated list of pokemon.')
+				.setRequired(true)));
 
 	override interact(interaction: ChatInputCommandInteraction) {
 		const list = interaction.options.getString('list', true);
-		switch(interaction.options.getSubcommand()) {
+		switch (interaction.options.getSubcommand()) {
 			case 'ruleset': return interaction.reply({ content: this.ruleset(list), flags: MessageFlags.Ephemeral });
 			case 'array': return interaction.reply({ content: this.array(list), flags: MessageFlags.Ephemeral });
 		}
@@ -45,18 +45,18 @@ export default new class extends BotCommand {
 	}
 
 	toPreciseFormes(list: string): string[] {
-		const { Dex, toID } = this.client.showdown;
+		const { pokedex, toID } = this.client;
 		return list
-		.split(/[,\n]/)
-		.map(toID)
-		.map((x) => Dex.species.get(x))
-		.map((x) => {
-			if(!x.exists) return '???';
-			// If base form and has non-cosmetic other formes and is not an exception
-			// then return with suffix '-Base'.
-			if(x.name === x.baseSpecies && x.otherFormes && !this.formeExceptions.includes(x.id)) return `${x.name}-Base`;
-			return x.name;
-		});
+			.split(/[,\n]/)
+			.map(toID)
+			.map((x) => pokedex[x])
+			.map((x) => {
+				if (!x) return '???';
+				// If base form and has non-cosmetic other formes and is not an exception
+				// then return with suffix '-Base'.
+				if (!x.baseSpecies && x.otherFormes && !this.formeExceptions.includes(x.id)) return `${x.name}-Base`;
+				return x.name;
+			});
 	}
 
 	/** Fully evolved species banned from 35 Pokes */

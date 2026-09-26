@@ -77,8 +77,8 @@ export default client;
 // fortunately, discordjs can wait for our async work to be done before connecting.
 // do not await this anonymous function, or else nodejs aborts!
 (async function() {
-	client.pokedex = require('./../data/pokedex.js').Pokedex;
-	console.log(Object.keys(client.pokedex));
+	const pokedexImport = require('./../data/pokedex.js');
+	client.pokedex = pokedexImport.Pokedex || pokedexImport.BattlePokedex;
 
 	for (const file of await fs.promises.readdir(Util.root('commands'))) {
 		if (file.startsWith('_') || !file.endsWith('.js')) continue;

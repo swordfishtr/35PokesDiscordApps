@@ -52,9 +52,11 @@ export default new class extends BotCommand {
 			.map((x) => pokedex[x])
 			.map((x) => {
 				if (!x) return '???';
-				// If base form and has non-cosmetic other formes and is not an exception
-				// then return with suffix '-Base'.
-				if (!x.baseSpecies && x.otherFormes && !this.formeExceptions.includes(x.id)) return `${x.name}-Base`;
+				// `!x.baseSpecies && x.otherFormes` is true only for the base formes
+				// of species that have non-cosmetic formes.
+				// Some of them are considered cosmetic by 35 Pokes; those are included
+				// in `this.formeExceptions`.
+				if (!x.baseSpecies && x.otherFormes && !this.formeExceptions.includes(toID(x.name))) return `${x.name}-Base`;
 				return x.name;
 			});
 	}
@@ -103,10 +105,12 @@ export default new class extends BotCommand {
 		'basculinwhitestriped', 'primeape', 'duraludon', 'sinistcha',
 	];
 
-	/** Species with non-cosmetic other formes that are considered cosmetic for tiering purposes */
+	/**
+	 * Species with non-cosmetic other formes that are considered cosmetic for tiering purposes
+	 * (if it returns `Species-Base` when it should not, add it here)
+	 */
 	formeExceptions: string[] = [
-		'dudunsparce', 'maushold', 'meowstic', 'poltchageist', 'polteageist', 'silvally',
-		'sinistcha', 'sinistea', 'squawkabilly', 'vivillon',
+		'dudunsparce', 'maushold', 'poltchageist', 'polteageist', 'sinistcha', 'sinistea', 'toxtricity', 'vivillon',
 	];
 
 	LC_banlist: string[] = [
